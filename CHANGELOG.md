@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 - `obsidian-note-system` main skill
 - `template-vault` mother vault for Obsidian initialization
+- file-based Obsidian / Codex / skill bridge protocol
+- `init_obsidian_codex_bridge.py` for creating the `_Codex` bridge folder
 - `Input / Internalization / Output` workflow definition
 - six mother templates and `素材` layer
 - `bootstrap_obsidian_vault.py` for vault initialization

@@ -1,4 +1,4 @@
 interface:
   display_name: "Obsidian Note System"
-  short_description: "Create, rewrite, govern, and initialize Chinese Obsidian notes and template vaults."
-  default_prompt: "Use $obsidian-note-system to initialize an Obsidian template vault, create or rewrite notes, classify them by the six mother templates, and keep the Input/Internalization/Output workflow consistent."
+  short_description: "Create, rewrite, govern, initialize, and bridge Chinese Obsidian notes with Codex."
+  default_prompt: "Use $obsidian-note-system to initialize an Obsidian template vault, connect Obsidian with Codex, create or rewrite notes, classify them by the six mother templates, and keep the Input/Internalization/Output workflow consistent."

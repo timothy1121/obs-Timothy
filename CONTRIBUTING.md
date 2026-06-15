@@ -60,6 +60,17 @@ Thanks for contributing to `obs-Timothy`.
 
 - `bootstrap_obsidian_vault.py` 能从仓库自带 `template-vault` 初始化成功
 - `find_obsidian_note.ps1` 能在指定 `-Root` 下正常搜索
+- `init_obsidian_codex_bridge.py` 能在指定 vault 中创建 `_Codex` 协作目录
+
+## Bridge rules
+
+如果改动 Obsidian / Codex 桥接协议，请保留这些约束：
+
+- 支持 `指令笔记.md` 和 `Inbox/` 两个入口
+- 支持 `Results/` 回写结果
+- 默认归档，不默认永久删除
+- 永久删除必须有明确指令
+- 不破坏全库读写能力
 
 ## Commit guidance
 

@@ -132,6 +132,48 @@ obs-Timothy/
 
 ## 使用
 
+### 连接 Obsidian 与 Codex
+
+运行：
+
+```text
+python scripts/init_obsidian_codex_bridge.py <vault>
+```
+
+默认正式知识库：
+
+```text
+C:\Users\26544\iCloudDrive\iCloud~md~obsidian
+```
+
+脚本会在知识库中创建：
+
+```text
+_Codex/
+├── 00-Codex协作说明.md
+├── 指令笔记.md
+├── Inbox/
+├── Results/
+├── Archive/
+└── Logs/
+```
+
+这个桥接目录用于让 Obsidian、Codex 和 `obsidian-note-system` 通过文件协议协作。
+
+支持动作：
+
+- `query`：查询知识库
+- `create`：新增笔记
+- `update`：修改笔记
+- `refine`：优化笔记
+- `archive`：归档笔记
+- `delete`：永久删除笔记
+
+删除规则：
+
+- 默认执行 `archive`
+- 只有明确写出 `永久删除`、`彻底删除` 或 `delete permanently` 时，才执行永久删除
+
 ### 初始化新知识库
 
 运行：
