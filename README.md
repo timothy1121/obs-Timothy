@@ -7,6 +7,27 @@
 
 它的目标不是提供一套“多收集一点内容”的笔记方案，而是提供一套可复用、可治理、可初始化的中文知识工作流。
 
+## English Summary
+
+`obs-Timothy` is an open-source Chinese note system for Obsidian. It combines:
+
+- a Codex skill: `obsidian-note-system`
+- a reusable vault template: `template-vault`
+
+Its purpose is to provide a repeatable workflow for structured knowledge work, not just a larger note collection.
+
+## Structure Diagram
+
+```mermaid
+flowchart TD
+    A["Goal"] --> B["Input"]
+    B <--> C["Internalization"]
+    C <--> D["Output"]
+    D --> E["Reusable result"]
+    D --> B
+    C --> B
+```
+
 ## 核心方法
 
 项目使用三层工作流：
