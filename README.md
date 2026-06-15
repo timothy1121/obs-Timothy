@@ -85,6 +85,8 @@ flowchart TD
 
 ```text
 obs-Timothy/
+├── plugins/
+│   └── obs-timothy-bridge/
 └── skills/
     └── obsidian-note-system/
         ├── SKILL.md
@@ -121,6 +123,19 @@ obs-Timothy/
 - 收敛后的 `.obsidian` 默认配置
 
 这个母版库只保留稳定结构、说明页和模板页，不承载具体知识内容。
+
+### 3. obs-timothy-bridge
+
+`plugins/obs-timothy-bridge/` 是 Obsidian 桌面插件。
+
+它负责：
+
+- 在 Obsidian 中创建 Codex 任务卡
+- 打开 `_Codex/指令笔记.md`
+- 打开 `_Codex/Results`
+- 可选执行本机配置的 Codex 命令
+
+直接执行本机命令默认关闭，需要在插件设置中手动开启。
 
 ## 安装
 
@@ -159,6 +174,16 @@ _Codex/
 ```
 
 这个桥接目录用于让 Obsidian、Codex 和 `obsidian-note-system` 通过文件协议协作。
+
+### 安装 Obsidian 插件
+
+把插件目录复制到 Obsidian 仓库：
+
+```text
+<vault>/.obsidian/plugins/obs-timothy-bridge
+```
+
+然后在 Obsidian 的社区插件设置中启用 `obs-Timothy Bridge`。
 
 支持动作：
 

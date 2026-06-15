@@ -62,6 +62,15 @@ Thanks for contributing to `obs-Timothy`.
 - `find_obsidian_note.ps1` 能在指定 `-Root` 下正常搜索
 - `init_obsidian_codex_bridge.py` 能在指定 vault 中创建 `_Codex` 协作目录
 
+## Plugin rules
+
+如果改动 `plugins/obs-timothy-bridge`，请至少确认：
+
+- `main.js` 能通过 JavaScript 语法检查
+- `manifest.json` 可以被 Obsidian 识别
+- shell execution 默认关闭
+- 插件默认只创建任务，不默认执行危险操作
+
 ## Bridge rules
 
 如果改动 Obsidian / Codex 桥接协议，请保留这些约束：
