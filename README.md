@@ -1,58 +1,49 @@
 # obs-Timothy
 
-一个面向 Obsidian 的中文原子笔记开源方案，包含两部分：
+`obs-Timothy` 是一个面向 Obsidian 的中文原子笔记开源方案，包含：
 
-- `obsidian-note-system`：用于 Codex 的技能目录
-- `template-vault`：用于初始化知识库的母版库
+- 一个用于 Codex 的技能：`obsidian-note-system`
+- 一个可直接初始化知识库的母版库：`template-vault`
 
-核心目标：
+它的目标不是提供一套“多收集一点内容”的笔记方案，而是提供一套可复用、可治理、可初始化的中文知识工作流。
 
-- 用 `Input / Internalization / Output` 管理知识流转
-- 用 6 类母模板治理正式笔记
-- 把 `素材` 保留为非正式层
-- 用稳定母版库初始化新的 Obsidian 知识库
+## 核心方法
 
-## 目录结构
+项目使用三层工作流：
 
-```text
-obs-Timothy/
-└── skills/
-    └── obsidian-note-system/
-        ├── SKILL.md
-        ├── agents/
-        ├── references/
-        ├── scripts/
-        └── template-vault/
-```
-
-## 包含内容
-
-### 1. Skill
-
-`skills/obsidian-note-system/`
-
-用于：
-
-- 初始化 Obsidian 知识库
-- 创建或改写中文笔记
-- 按 6 类母模板分类
-- 保持 `Input / Internalization / Output` 一致
-
-### 2. Template Vault
-
-`skills/obsidian-note-system/template-vault/`
-
-包含：
-
-- `00-原子笔记总纲`
-- `01-母版使用说明`
-- `02-快速开始`
 - `Input`
 - `Internalization`
 - `Output`
-- 收敛后的 `.obsidian` 默认配置
 
-## 笔记规则
+对应关系：
+
+```text
+输入 = Input
+内化 = Internalization
+输出 = Output
+```
+
+基本流程：
+
+```text
+目标
+ ↓
+输入 ←→ 内化 ←→ 输出
+ ↑       ↑       ↓
+ └──── 反馈与迭代 ────┘
+```
+
+核心原则：
+
+- 先判断知识类型，再决定结构
+- 一张卡只解决一个核心对象
+- 不强迫所有笔记套同一个结构
+- 保留 `关联知识`
+- 中文简洁
+- 机制优先
+- 忠实原意
+
+## 笔记结构
 
 正式层使用 6 类母模板：
 
@@ -67,17 +58,50 @@ obs-Timothy/
 
 7. 素材
 
-核心规则：
+素材用于摘录、片段、提纲、灵感和未完成内容，不强行升格为正式知识卡。
 
-- 先判断知识类型，再决定结构
-- 一张卡只解决一个核心对象
-- 不强迫所有笔记套同一个结构
-- 保留 `关联知识`
-- 中文简洁
-- 机制优先
-- 忠实原意
+## 项目内容
 
-## 安装方式
+```text
+obs-Timothy/
+└── skills/
+    └── obsidian-note-system/
+        ├── SKILL.md
+        ├── agents/
+        ├── references/
+        ├── scripts/
+        └── template-vault/
+```
+
+### 1. obsidian-note-system
+
+`skills/obsidian-note-system/` 是主 skill。
+
+它负责：
+
+- 初始化 Obsidian 知识库
+- 创建或改写中文笔记
+- 按 6 类母模板分类
+- 把素材整理成正式卡
+- 保持 `Input / Internalization / Output` 一致
+
+### 2. template-vault
+
+`skills/obsidian-note-system/template-vault/` 是母版库。
+
+它包含：
+
+- `00-原子笔记总纲`
+- `01-母版使用说明`
+- `02-快速开始`
+- `Input`
+- `Internalization`
+- `Output`
+- 收敛后的 `.obsidian` 默认配置
+
+这个母版库只保留稳定结构、说明页和模板页，不承载具体知识内容。
+
+## 安装
 
 把 `skills/obsidian-note-system` 复制到你的 Codex skills 目录中，例如：
 
@@ -85,9 +109,9 @@ obs-Timothy/
 ~/.codex/skills/obsidian-note-system
 ```
 
-## 使用方式
+## 使用
 
-### 初始化知识库
+### 初始化新知识库
 
 运行：
 
@@ -113,7 +137,7 @@ python scripts/bootstrap_obsidian_vault.py <target>
 `find_obsidian_note.ps1` 支持：
 
 - 显式传入 `-Root`
-- 或用环境变量 `OBSIDIAN_NOTE_SYSTEM_VAULT_ROOT`
+- 或使用环境变量 `OBSIDIAN_NOTE_SYSTEM_VAULT_ROOT`
 
 示例：
 
@@ -125,9 +149,12 @@ powershell -File scripts/find_obsidian_note.ps1 -Title "系统思维" -Root "D:\
 
 - 中文原子笔记治理
 - Obsidian 母版库初始化
-- 把素材整理成结构化正式卡
+- 素材到正式卡的结构化整理
 - 在 Codex 中复用同一套笔记工作流
 
 ## 开源协议
 
 MIT License
+
+详细变更见 [CHANGELOG.md](./CHANGELOG.md)。  
+协作方式见 [CONTRIBUTING.md](./CONTRIBUTING.md)。
