@@ -7,9 +7,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `obs-timothy-bridge` Obsidian desktop plugin
-- ribbon entry for opening the Codex command note
-- commands for creating `query`, `create`, `update`, `refine`, `archive`, and `delete` bridge tasks
-- command for opening the results index
+- ribbon entry for `Codex: 问一下`
+- simplified Chinese commands for asking Codex, refining the current note, restructuring the current note, adding related links, and opening the latest result
 - optional local shell command execution
 - plugin settings for bridge folder, default scope, shell execution, and local command
 
@@ -18,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - shell execution is disabled by default
 - local command must be explicitly configured
 - destructive note handling remains governed by the bridge protocol
+- permanent delete is not exposed as a shortcut command
 
 ## v0.1.0 - Initial open-source release
 

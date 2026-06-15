@@ -1,4 +1,4 @@
-const { App, Modal, Notice, Plugin, PluginSettingTab, Setting } = require("obsidian");
+const { Modal, Notice, Plugin, PluginSettingTab, Setting } = require("obsidian");
 const childProcess = require("child_process");
 
 const DEFAULT_SETTINGS = {
@@ -9,45 +9,56 @@ const DEFAULT_SETTINGS = {
   defaultScope: "whole-vault"
 };
 
-const ACTIONS = ["query", "create", "update", "refine", "archive", "delete"];
-
 module.exports = class ObsTimothyBridgePlugin extends Plugin {
   async onload() {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
-    this.addRibbonIcon("terminal-square", "obs-Timothy Bridge", async () => {
-      await this.openCommandNote();
+    this.addRibbonIcon("message-square", "问 Codex", async () => {
+      await this.askCodex();
     });
 
     this.addCommand({
-      id: "open-command-note",
-      name: "Open Codex command note",
-      callback: async () => this.openCommandNote()
+      id: "ask-codex",
+      name: "Codex: 问一下",
+      callback: async () => this.askCodex()
     });
 
     this.addCommand({
-      id: "new-bridge-task",
-      name: "New Codex bridge task",
-      callback: async () => this.openTaskModal()
+      id: "refine-current-note",
+      name: "Codex: 优化当前笔记",
+      callback: async () => this.createCurrentNoteTask(
+        "refine",
+        "优化这篇笔记，保持原意，按合适的知识类型和模板整理，保留有价值的双链。"
+      )
     });
 
-    for (const action of ACTIONS) {
-      this.addCommand({
-        id: `new-${action}-task`,
-        name: `New Codex ${action} task`,
-        callback: async () => this.openTaskModal(action)
-      });
-    }
+    this.addCommand({
+      id: "structure-current-note",
+      name: "Codex: 整理当前笔记结构",
+      callback: async () => this.createCurrentNoteTask(
+        "update",
+        "按知识类型重新整理这篇笔记结构，去掉空泛内容，保留原意和关键信息。"
+      )
+    });
 
     this.addCommand({
-      id: "open-results-folder",
-      name: "Open Codex results folder",
-      callback: async () => this.openResultsIndex()
+      id: "link-current-note",
+      name: "Codex: 补充当前笔记关联",
+      callback: async () => this.createCurrentNoteTask(
+        "update",
+        "为这篇笔记补充合理的关联知识和 Obsidian 双链，避免生硬堆砌。"
+      )
+    });
+
+    this.addCommand({
+      id: "open-latest-result",
+      name: "Codex: 查看最新结果",
+      callback: async () => this.openLatestResult()
     });
 
     this.addCommand({
       id: "run-local-codex-command",
-      name: "Run configured local Codex command",
+      name: "Codex: 执行本机命令",
       callback: async () => this.runLocalCodexCommand()
     });
 
@@ -80,46 +91,39 @@ module.exports = class ObsTimothyBridgePlugin extends Plugin {
     }
   }
 
-  async openCommandNote() {
+  async askCodex() {
     await this.ensureBridge();
-    await this.openFile(`${this.settings.bridgeFolder}/${this.settings.commandNoteName}`);
+    new SimpleAskModal(this.app, async (question) => {
+      await this.createTask("query", "全库", question || "请查询知识库。");
+    }).open();
   }
 
-  async openResultsIndex() {
+  async createCurrentNoteTask(action, request) {
     await this.ensureBridge();
-    await this.openFile(`${this.settings.bridgeFolder}/Results/00-结果索引.md`);
-  }
-
-  async openFile(path) {
-    const file = this.app.vault.getAbstractFileByPath(path);
-    if (!file) {
-      new Notice(`File not found: ${path}`);
+    const file = this.app.workspace.getActiveFile();
+    if (!file || file.extension !== "md") {
+      new Notice("请先打开一篇 Markdown 笔记。");
       return;
     }
-    await this.app.workspace.getLeaf(false).openFile(file);
-  }
 
-  async openTaskModal(action = "query") {
-    await this.ensureBridge();
-    new CodexTaskModal(this.app, this, action).open();
+    await this.createTask(action, file.path, request);
   }
 
   async createTask(action, target, request) {
-    await this.ensureBridge();
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const safeTarget = target.trim() || "未命名任务";
-    const filename = `${timestamp}-${action}.md`;
+    const safeTitle = this.toSafeFilename(target || "任务");
+    const filename = `${timestamp}-${action}-${safeTitle}.md`;
     const path = `${this.settings.bridgeFolder}/Inbox/${filename}`;
     const content = [
-      `# Codex Task - ${action}`,
+      `# Codex 任务 - ${action}`,
       "",
       "## Codex Request",
       "",
       `action: ${action}`,
-      `target: ${safeTarget}`,
+      `target: ${target || "全库"}`,
       `scope: ${this.settings.defaultScope}`,
       "request:",
-      request.trim() || "请处理这个任务。",
+      request || "请处理这个任务。",
       "",
       "## Codex Result",
       "",
@@ -129,18 +133,46 @@ module.exports = class ObsTimothyBridgePlugin extends Plugin {
 
     await this.app.vault.create(path, content);
     await this.openFile(path);
-    new Notice(`Created Codex task: ${filename}`);
+    new Notice("已创建 Codex 任务。回到 Codex 后说：处理 Obsidian 任务。");
+  }
+
+  async openLatestResult() {
+    await this.ensureBridge();
+    const folder = this.app.vault.getAbstractFileByPath(`${this.settings.bridgeFolder}/Results`);
+    if (!folder || !folder.children || folder.children.length === 0) {
+      await this.openFile(`${this.settings.bridgeFolder}/Results/00-结果索引.md`);
+      return;
+    }
+
+    const latest = folder.children
+      .filter((child) => child.extension === "md")
+      .sort((a, b) => b.stat.mtime - a.stat.mtime)[0];
+
+    if (latest) {
+      await this.app.workspace.getLeaf(false).openFile(latest);
+    } else {
+      await this.openFile(`${this.settings.bridgeFolder}/Results/00-结果索引.md`);
+    }
+  }
+
+  async openFile(path) {
+    const file = this.app.vault.getAbstractFileByPath(path);
+    if (!file) {
+      new Notice(`找不到文件：${path}`);
+      return;
+    }
+    await this.app.workspace.getLeaf(false).openFile(file);
   }
 
   async runLocalCodexCommand() {
     if (!this.settings.enableShellExecution) {
-      new Notice("Shell execution is disabled in obs-Timothy Bridge settings.");
+      new Notice("本机命令执行已关闭。请先在插件设置里开启。");
       return;
     }
 
     const command = this.settings.codexCommand.trim();
     if (!command) {
-      new Notice("No Codex command configured.");
+      new Notice("未配置 Codex 命令。");
       return;
     }
 
@@ -151,19 +183,19 @@ module.exports = class ObsTimothyBridgePlugin extends Plugin {
       .replaceAll("{bridge}", `${cwd}\\${this.settings.bridgeFolder}`);
 
     const logPath = `${this.settings.bridgeFolder}/Logs/${new Date().toISOString().replace(/[:.]/g, "-")}.md`;
-    new Notice("Running configured Codex command...");
+    new Notice("正在执行本机 Codex 命令。");
 
     childProcess.exec(resolved, { cwd }, async (error, stdout, stderr) => {
       const content = [
-        "# Codex Command Log",
+        "# Codex 命令日志",
         "",
-        "## Command",
+        "## 命令",
         "",
         "```text",
         resolved,
         "```",
         "",
-        "## Exit",
+        "## 状态",
         "",
         error ? `error: ${error.message}` : "ok",
         "",
@@ -182,7 +214,7 @@ module.exports = class ObsTimothyBridgePlugin extends Plugin {
       ].join("\n");
 
       await this.app.vault.create(logPath, content);
-      new Notice(error ? "Codex command finished with errors." : "Codex command finished.");
+      new Notice(error ? "Codex 命令执行完成，但有错误。" : "Codex 命令执行完成。");
     });
   }
 
@@ -191,12 +223,27 @@ module.exports = class ObsTimothyBridgePlugin extends Plugin {
     return adapter && adapter.basePath ? adapter.basePath : "";
   }
 
+  toSafeFilename(value) {
+    return value
+      .replace(/[\\/:*?"<>|#^\[\]]/g, "-")
+      .replace(/\s+/g, "-")
+      .slice(0, 40) || "任务";
+  }
+
   getOverviewContent() {
     return `# Codex 协作说明
 
 这个目录用于连接 Obsidian、Codex 和 \`obsidian-note-system\`。
 
-## 入口
+## 常用方式
+
+- 使用命令 \`Codex: 问一下\` 查询知识库
+- 打开一篇笔记后，使用 \`Codex: 优化当前笔记\`
+- 打开一篇笔记后，使用 \`Codex: 整理当前笔记结构\`
+- 打开一篇笔记后，使用 \`Codex: 补充当前笔记关联\`
+- 使用 \`Codex: 查看最新结果\` 查看结果
+
+## 目录
 
 - [[指令笔记]]：单次请求
 - [[Inbox]]：持续任务
@@ -231,58 +278,36 @@ status: pending
   }
 };
 
-class CodexTaskModal extends Modal {
-  constructor(app, plugin, action) {
+class SimpleAskModal extends Modal {
+  constructor(app, onSubmit) {
     super(app);
-    this.plugin = plugin;
-    this.action = action;
-    this.target = "";
-    this.request = "";
+    this.onSubmit = onSubmit;
+    this.question = "";
   }
 
   onOpen() {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.createEl("h2", { text: "New Codex bridge task" });
+    contentEl.createEl("h2", { text: "问 Codex" });
 
     new Setting(contentEl)
-      .setName("Action")
-      .addDropdown((dropdown) => {
-        for (const action of ACTIONS) {
-          dropdown.addOption(action, action);
-        }
-        dropdown.setValue(this.action);
-        dropdown.onChange((value) => {
-          this.action = value;
-        });
-      });
-
-    new Setting(contentEl)
-      .setName("Target")
-      .addText((text) => {
-        text.setPlaceholder("note title or path");
-        text.onChange((value) => {
-          this.target = value;
-        });
-      });
-
-    new Setting(contentEl)
-      .setName("Request")
+      .setName("问题")
+      .setDesc("输入一句话即可。")
       .addTextArea((text) => {
-        text.setPlaceholder("Describe what Codex should do.");
-        text.inputEl.rows = 6;
+        text.setPlaceholder("例如：帮我找系统思维相关笔记，并总结关联。");
+        text.inputEl.rows = 5;
         text.onChange((value) => {
-          this.request = value;
+          this.question = value;
         });
       });
 
     new Setting(contentEl)
       .addButton((button) => {
         button
-          .setButtonText("Create task")
+          .setButtonText("创建任务")
           .setCta()
           .onClick(async () => {
-            await this.plugin.createTask(this.action, this.target, this.request);
+            await this.onSubmit(this.question.trim());
             this.close();
           });
       });
@@ -305,8 +330,8 @@ class ObsTimothyBridgeSettingTab extends PluginSettingTab {
     containerEl.createEl("h2", { text: "obs-Timothy Bridge" });
 
     new Setting(containerEl)
-      .setName("Bridge folder")
-      .setDesc("Folder used for Obsidian/Codex task exchange.")
+      .setName("桥接目录")
+      .setDesc("用于 Obsidian 与 Codex 交换任务的目录。")
       .addText((text) => {
         text.setValue(this.plugin.settings.bridgeFolder);
         text.onChange(async (value) => {
@@ -316,8 +341,8 @@ class ObsTimothyBridgeSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Default scope")
-      .setDesc("Scope written into new task cards.")
+      .setName("默认范围")
+      .setDesc("写入任务卡的默认范围。")
       .addText((text) => {
         text.setValue(this.plugin.settings.defaultScope);
         text.onChange(async (value) => {
@@ -327,8 +352,8 @@ class ObsTimothyBridgeSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Enable shell execution")
-      .setDesc("Allows this plugin to run the configured local command. Keep disabled unless you understand the risk.")
+      .setName("允许执行本机命令")
+      .setDesc("允许插件执行配置的本机命令。默认关闭。")
       .addToggle((toggle) => {
         toggle.setValue(this.plugin.settings.enableShellExecution);
         toggle.onChange(async (value) => {
@@ -338,8 +363,8 @@ class ObsTimothyBridgeSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName("Codex command")
-      .setDesc("Local command to run. Supports {vault} and {bridge} placeholders.")
+      .setName("Codex 命令")
+      .setDesc("支持 {vault} 和 {bridge} 占位符。")
       .addTextArea((text) => {
         text.setValue(this.plugin.settings.codexCommand);
         text.inputEl.rows = 4;
