@@ -243,6 +243,30 @@ python scripts/bootstrap_obsidian_vault.py <target>
 powershell -File scripts/find_obsidian_note.ps1 -Title "系统思维" -Root "D:\my-vault"
 ```
 
+### 自动写入笔记
+
+`write_obsidian_note.py` 可以把标题和 Markdown 内容直接写入 Obsidian 目录。
+
+默认写入目录：
+
+```text
+C:\Users\26544\iCloudDrive\iCloud~md~obsidian\Obsidian\原子卡片-要素
+```
+
+示例：
+
+```text
+python scripts/write_obsidian_note.py --title "系统思维" --content "**系统思维**"
+```
+
+重名时默认不会覆盖，而是自动生成后缀文件，例如：
+
+```text
+系统思维 2.md
+```
+
+只有明确传入 `--if-exists overwrite` 时才覆盖旧文件。
+
 ## 适用场景
 
 - 中文原子笔记治理

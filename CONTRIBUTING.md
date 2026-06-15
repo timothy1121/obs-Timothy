@@ -61,6 +61,7 @@ Thanks for contributing to `obs-Timothy`.
 - `bootstrap_obsidian_vault.py` 能从仓库自带 `template-vault` 初始化成功
 - `find_obsidian_note.ps1` 能在指定 `-Root` 下正常搜索
 - `init_obsidian_codex_bridge.py` 能在指定 vault 中创建 `_Codex` 协作目录
+- `write_obsidian_note.py` 能写入指定目录，并且默认不覆盖同名文件
 
 ## Plugin rules
 

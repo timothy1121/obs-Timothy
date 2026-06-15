@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `obs-timothy-bridge` Obsidian desktop plugin
+- `write_obsidian_note.py` for automatic note writing
 - ribbon entry for `Codex: 问一下`
 - simplified Chinese commands for asking Codex, refining the current note, restructuring the current note, adding related links, and opening the latest result
 - optional local shell command execution
@@ -18,6 +19,7 @@ All notable changes to this project will be documented in this file.
 - local command must be explicitly configured
 - destructive note handling remains governed by the bridge protocol
 - permanent delete is not exposed as a shortcut command
+- automatic note writing uses suffixed filenames by default instead of overwriting
 
 ## v0.1.0 - Initial open-source release
 
